@@ -3,16 +3,25 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Post;
+use Illuminate\Http\Request;
 
-class PostController extends Controller
+class CommentController extends Controller
 {
-    public function index()
+    public function show($type, $id)
     {
-        $posts = Post::with('comments')->get();
+        $model = match ($type) {
+            'post' => \App\Models\Post::class,
+            'video' => \App\Models\Video::class,
+            'audio' => \App\Models\Audio::class,
+            default => null
+        };
+
+        if (!$model) return response()->json(['error' => 'Type not found'], 404);
+
+        $item = $model::findOrFail($id);
 
         return response()->json([
-            'data' => $posts
+            'data' => $item->comments
         ]);
     }
 }
